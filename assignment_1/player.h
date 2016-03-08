@@ -16,6 +16,11 @@ public:
 
     // Flag to tell if the player is running within the test_minimax context
     bool testingMinimax;
+    Board board;
+    Side side;
+private:
+	Move *getBestMove();
+	int score_board(Board *b);
 };
 
 #endif
