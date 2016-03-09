@@ -2,7 +2,7 @@
 #include "common.h"
 
 #define RANDOM_MOVES false
-#define SIMPLE_MOVES true
+#define SIMPLE_MOVES false
 
 /*
  * Constructor for the player; initialize everything here. The side your AI is
@@ -11,7 +11,7 @@
  */
 Player::Player(Side side) {
     // Will be set to true in test_minimax.cpp.
-    testingMinimax = false;
+    testingMinimax = true;
 
     /* 
      * TODO: Do any initialization you need to do here (setting up the board,
@@ -51,8 +51,6 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
         return NULL;
 
     if (RANDOM_MOVES) {
-        
-
         for (int x = 0; x < 8; x += 1) {
             for (int y = 0; y < 8; y += 1) {
                 Move *m = new Move(x, y);
@@ -64,14 +62,20 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
         }
         return NULL;
     }
-    else {
-        Move *m = getBestMove();
+    else if (SIMPLE_MOVES) {
+        Move *m = simpleAIMove();
         board.doMove(m, this->side);
         return m;
     }
+    else if (testingMinimax){
+        Move *m = minimaxMove();
+        board.doMove(m, this->side);
+        return m;
+    }
+    return NULL;
 }
 
-Move *Player::getBestMove() {
+Move *Player::simpleAIMove() {
     Board *copy = board.copy();
     
     Move *best_move = NULL;
@@ -101,6 +105,55 @@ Move *Player::getBestMove() {
         }
     }
     return best_move;
+}
+
+Move *Player::minimaxMove() {
+    int best_score = -1000000;
+    Move *best_move = NULL;
+    for (int x = 0; x < 8; x += 1) {
+        for (int y = 0; y < 8; y += 1) {
+            Move *m = new Move(x, y);
+            if (board.checkMove(m, this->side)) {
+                Board *copy = board.copy();
+                copy->doMove(m, this->side);
+                int score = minimax(copy, 1, 2);
+                if (score > best_score) {
+                    best_score = score;
+                    best_move = m;
+                }
+                else {
+                    delete m;
+                }
+            }
+        }
+    }
+    return best_move;
+}
+
+int Player::minimax(Board *b, int cd, int d) {
+    if (cd == d) {
+        return minimax_score_board(b);
+    }
+    int score = 10000000;
+    for (int x = 0; x < 8; x += 1) {
+        for (int y = 0; y < 8; y += 1) {
+            Move *m = new Move(x, y);
+            if (b->checkMove(m, this->side)) {
+                Board *copy = b->copy();
+                copy->doMove(m, this->side);
+                score = min(score, minimax(copy, cd + 1, d));
+            }
+        }
+    }
+    return score;
+}
+
+int Player::minimax_score_board(Board *b) {
+    int score = b->countBlack() - b->countWhite();
+    if (this->side == WHITE) {
+        score *= -1;
+    } 
+    return score;
 }
 
 int Player::score_board(Board *b) {
@@ -139,4 +192,8 @@ int Player::score_board(Board *b) {
         score *= -1;
     }
     return score;
+}
+
+void Player::setBoard(char data[64]) {
+    board.setBoard(data);
 }
