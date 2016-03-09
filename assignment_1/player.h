@@ -22,7 +22,7 @@ public:
 private:
 	Move *simpleAIMove();
 	Move *minimaxMove();
-	int minimax(Board* b, int current_depth, int max_depth);
+	int minimax(Board* b, int current_depth, int max_depth, bool self);
 	int score_board(Board *b);
 	int minimax_score_board(Board *b);
 

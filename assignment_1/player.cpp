@@ -67,7 +67,7 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
         board.doMove(m, this->side);
         return m;
     }
-    else if (testingMinimax){
+    else if (testingMinimax) {
         Move *m = minimaxMove();
         board.doMove(m, this->side);
         return m;
@@ -116,7 +116,7 @@ Move *Player::minimaxMove() {
             if (board.checkMove(m, this->side)) {
                 Board *copy = board.copy();
                 copy->doMove(m, this->side);
-                int score = minimax(copy, 1, 2);
+                int score = minimax(copy, 1, 4, false);
                 if (score > best_score) {
                     best_score = score;
                     best_move = m;
@@ -130,18 +130,20 @@ Move *Player::minimaxMove() {
     return best_move;
 }
 
-int Player::minimax(Board *b, int cd, int d) {
+int Player::minimax(Board *b, int cd, int d, bool self) {
+    Side os = this->side == WHITE ? BLACK : WHITE;
     if (cd == d) {
         return minimax_score_board(b);
     }
-    int score = 10000000;
+    int score = minimax_score_board(b);
     for (int x = 0; x < 8; x += 1) {
         for (int y = 0; y < 8; y += 1) {
             Move *m = new Move(x, y);
-            if (b->checkMove(m, this->side)) {
+            if (b->checkMove(m, self ? this->side : os)) {
                 Board *copy = b->copy();
-                copy->doMove(m, this->side);
-                score = min(score, minimax(copy, cd + 1, d));
+                copy->doMove(m, self ? this->side : os);
+                int mscore = minimax(copy, cd + 1, d, !self);
+                score = min(score, mscore);
             }
         }
     }
