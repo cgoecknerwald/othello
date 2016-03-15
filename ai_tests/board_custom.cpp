@@ -3,6 +3,7 @@
 #include "board_custom.h"
 #include "common.h"
 #include <stdio.h>
+#include <memory>
 
 using namespace std;
 

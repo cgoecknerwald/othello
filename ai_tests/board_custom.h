@@ -2,6 +2,7 @@
 #define __BOARD_CUSTOM_H__
 
 #include <vector>
+#include <memory>
 #include "common.h"
 
 using namespace std;
