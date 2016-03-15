@@ -19,12 +19,13 @@ public:
 
 class Move {   
 public:
-    int x, y;
+    int x, y, type;
     vector<Dir *> *dirs;
 
     Move(int x, int y) {
         this->x = x;
         this->y = y;
+        type = 0;
         dirs = new vector<Dir *>();
     }
 
@@ -39,12 +40,14 @@ private:
     vector<bool> black;
     vector<bool> taken;
     void print();
+    
 public:
     Board();
     Board *copy();
     int get(int x, int y);
     int count(Side);
     bool is_valid_move(const Move *m, const Side);
+    static const int score_board[64];
 
     /**
      * after execution, m's dir vector will contain

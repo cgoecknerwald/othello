@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <random>
+#include <algorithm>
+#include <ctime> 
 #include "player.h"
 #include "common.h"
 #include "board_custom.h"
 
 #define HEURISTIC false
-#define NUM_SIMS 700
+#define NUM_SIMS 1000
 /*
  * Constructor for the player; initialize everything here. The side your AI is
  * on (BLACK or WHITE) is passed in as "side". The constructor must finish 
@@ -14,7 +16,7 @@
 Player::Player(Side side) : rng(rd()) {
     // Will be set to true in test_minimax.cpp.
     testingMinimax = false;
-
+    srand ( unsigned ( time(NULL) ) );
     /* 
      * TODO: Do any initialization you need to do here (setting up the board,
      * precalculating things, etc.) However, remember that you will only have
@@ -100,10 +102,11 @@ double Player::simulate_rand(Board *b) {
     Side temp;
     
     vector<Move *> *moves = b->get_valid_moves(p1);
-    double bonus = this->calc_bonus(b, p1, moves);
+    double bonus = this->calc_bonus(b, p1, moves, NULL);
 
     while (moves->size()) {
         Move *m = this->pick_move(b, p1, moves);
+        bonus += this->calc_bonus(b, p1, NULL, m);
 
         b->do_move(m, p1);
         
@@ -114,7 +117,6 @@ double Player::simulate_rand(Board *b) {
 
         delete moves;
         moves = b->get_valid_moves(p1);
-        bonus += this->calc_bonus(b, p1, moves);
 
         if (moves->size() == 0) {
 
@@ -124,10 +126,10 @@ double Player::simulate_rand(Board *b) {
 
             delete moves;
             moves = b->get_valid_moves(p1);
-            bonus += this->calc_bonus(b, p1, moves);
+            bonus += this->calc_bonus(b, p1, moves, NULL);
         }
     }
-    return 10 * ((b->count(this->side) - b->count(other)) > 0) + bonus;
+    return 2 * ((b->count(this->side) - b->count(other)) > 0) + bonus;
 }
 
 /*
@@ -143,15 +145,30 @@ int Player::rand_int(int from, int to) {
  * Calculates the bonus (detailed in AI.txt). This bonus improves AI function-
  * ality by maxmizing the impact of "good" states, and punishing for "bad". 
  */
-double Player::calc_bonus(Board *b, Side s, vector<Move *> *moves) {
+double Player::calc_bonus(Board *b, Side s, vector<Move *> *moves, Move *m) {
+
     double bonus = 0.0;
     int c = (this->side == s) ? 1 : -1;
+    if (m != NULL) {
+        int x = m->x;
+        int y = m->y;
+        if ((x == 0 && y == 0)  ||
+            (x == 7 && y == 0)  ||
+            (x == 0 && y == 7)  ||
+            (x == 7 && y == 7) ){
+            bonus = 0.1;
+            return bonus*c;
+        }
+    }
+    if (moves == NULL) {
+        return 0;
+    }
 
-    // Mobility bonus: we want to maximize our number of moves
-    bonus += moves->size() * 0.005; 
+    //mobility bonus
+    bonus += moves->size() * 1; 
 
-    // Score bonus: we want to maximize our score
-    bonus += (b->count(s) - b->count(s == BLACK ? WHITE : BLACK)) * 0.003;
+    //score bonus
+    //bonus += (b->count(s) - b->count(s == BLACK ? WHITE : BLACK)) * 0.02;
 
     /* 
      * Iterate through each of the corners, (0,0), (0,7), (7,0), and (7,7). 
@@ -169,7 +186,7 @@ double Player::calc_bonus(Board *b, Side s, vector<Move *> *moves) {
             // Corner bonus: we want to have corners, and keep them from the enemy.
             Side corner = b->get(x, y) == 1 ? BLACK : WHITE;
             if (s) {
-                bonus += (s == corner) ? 0.01 : -0.01;
+                bonus += (s == corner) ? 2 : -2;
             }
         }
     }
@@ -183,6 +200,20 @@ double Player::calc_bonus(Board *b, Side s, vector<Move *> *moves) {
  * In our simulation, we pick for our AI and enemy AI.
  */
 Move *Player::pick_move(Board *b, Side s, vector<Move *> *moves) {
+
+    random_shuffle(moves->begin(), moves->end());
+    vector<Move *>::iterator it; 
+    int best_score = -10;
+    Move *best = NULL;
+    for (it = moves->begin(); it != moves->end(); it++) {
+        Move *m = *it;
+        int b = Board::score_board[m->x + m->y * 8];
+        if (b > best_score) {
+            best_score = b;
+            best = m;
+        }
+    }
+    return best;
     
     /* 
      * Move "m"-n indicates the n-th priority square based on the Roxanne chart.
@@ -193,17 +224,24 @@ Move *Player::pick_move(Board *b, Side s, vector<Move *> *moves) {
     Move *m4 = NULL;
     Move *m5 = NULL;
 
-    for (int i = 0; i < moves->size(); i += 1) {
-        Move *m = (*moves)[i];
+    random_shuffle(moves->begin(), moves->end());
+    //vector<Move *>::iterator it; 
+    for (it = moves->begin(); it != moves->end(); it++) {
+
+
+
+        Move *m = *it;
         int x = m->x;
         int y = m->y;
         if ((x == 0 && y == 0)  ||
             (x == 7 && y == 0)  ||
             (x == 0 && y == 7)  ||
             (x == 7 && y == 7) ){
+            m->type = 1;
             return m;
         }
         else if ((2 <= x && x <= 5) && (2 <= y && y <= 5)) {
+            m->type = 2;
             m2 = m;
         }
         else if ((x == 0 && y == 1) ||
@@ -221,12 +259,15 @@ Move *Player::pick_move(Board *b, Side s, vector<Move *> *moves) {
                  (x == 6 && y == 0) ||
                  (x == 6 && y == 1) ||
                  (x == 7 && y == 1)) {
+            m->type = 5;
             m5 = m;
         }
         else if(x == 0 || x == 7 || y == 0 || y == 7) {
+            m->type = 3;
             m3 = m;
         }
         else {
+            m->type = 4;
             m4 = m;
         }
     }
