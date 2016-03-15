@@ -15,9 +15,9 @@ Our next struggle was with randomization. Since we are playing 10 games against 
 ## Contributions
 
 Enrico:
-Wrote AI. Read about the Monte-Carlo method in "Analysis of Monte Carlo Techniques in Othello" by Ryan Archer.
+Wrote *board_custom.cpp* (own board implementation, for speed). Composed general structure and algorithms of *player.cpp*. Read about the Monte-Carlo method in "Analysis of Monte Carlo Techniques in Othello" by Ryan Archer.
 
 Claire:
-Composed Contributions.txt and AI.txt. Read about the Upper Confidence Bounds in "Analysis of Monte Carlo Techniques in Othello" by Ryan Archer.
+Composed Contributions.txt and AI.txt. Read about the Upper Confidence Bounds in "Analysis of Monte Carlo Techniques in Othello" by Ryan Archer. Mimicked OogeePlayer by modifying BetterPlayer to recurse to depth 4.
 
 
