@@ -12,12 +12,18 @@ This encompasses several things: realizing that Players will select for corners 
 
 Our next struggle was with randomization. Since we are playing 10 games against each AI, if our player plays the same way every time, we could lose 0/10. If we implement some sort of randomization, we have a chance of avoiding this pitfall. We will also look into applying Upper Confidence Bounds to the AI.  
 
+### Roxanne Priority Table
+
+For reference, this is the "Roxanne Priority Table", as detailed by Ryan Archer in his Ph.D. dissertation "Analysis of Monte Carlo Techniques in Othello". The Roxanne table is used to modify the Monte Carlo method - it is no longer sampling randomly, but rather, based on the probable moves by a decently intelligent AI. 
+
+![Priority table](/img/roxanne.png)
+
 ## Contributions
 
 Enrico:
-Wrote *board_custom.cpp* (own board implementation, for speed). Composed general structure and algorithms of *player.cpp*. Read about the Monte-Carlo method in "Analysis of Monte Carlo Techniques in Othello" by Ryan Archer.
+Wrote *board_custom.cpp* (own board implementation, for speed). Composed general structure and algorithms of *player.cpp* (the AI). Read about the Monte-Carlo method in "Analysis of Monte Carlo Techniques in Othello" by Ryan Archer.
 
 Claire:
-Composed Contributions.txt and AI.txt. Read about the Upper Confidence Bounds in "Analysis of Monte Carlo Techniques in Othello" by Ryan Archer. Mimicked OogeePlayer by modifying BetterPlayer to recurse to depth 4.
+Composed *Contributions.txt*, *AI.txt*, and *README.md*. Commented and optimized *player.cpp* (the AI). Read about the Upper Confidence Bounds in "Analysis of Monte Carlo Techniques in Othello" by Ryan Archer. Mimicked OogeePlayer by modifying BetterPlayer to recurse to depth 4.
 
 
