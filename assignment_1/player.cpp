@@ -11,7 +11,7 @@
  */
 Player::Player(Side side) {
     // Will be set to true in test_minimax.cpp.
-    testingMinimax = false;
+    testingMinimax = true;
 
     /* 
      * TODO: Do any initialization you need to do here (setting up the board,
@@ -116,7 +116,7 @@ Move *Player::minimaxMove() {
             if (board.checkMove(m, this->side)) {
                 Board *copy = board.copy();
                 copy->doMove(m, this->side);
-                int score = minimax(copy, 1, 2, false);
+                int score = minimax(copy, 1, 6, false);
                 if (score > best_score) {
                     best_score = score;
                     best_move = m;
