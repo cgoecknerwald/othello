@@ -1,0 +1,5 @@
+Enrico:
+Wrote AI. Read about the Monte-Carlo method in "Analysis of Monte Carlo Techniques in Othello" by Ryan Archer.
+
+Claire:
+Composed Contributions.txt and AI.txt. Read about the Upper Confidence Bounds in "Analysis of Monte Carlo Techniques in Othello" by Ryan Archer.
