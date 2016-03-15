@@ -7,7 +7,7 @@
 #include "board_custom.h"
 
 #define HEURISTIC false
-#define NUM_SIMS 1000
+#define NUM_SIMS 500
 /*
  * Constructor for the player; initialize everything here. The side your AI is
  * on (BLACK or WHITE) is passed in as "side". The constructor must finish 
@@ -16,13 +16,13 @@
 Player::Player(Side side) : rng(rd()) {
     // Will be set to true in test_minimax.cpp.
     testingMinimax = false;
-    srand ( unsigned ( time(NULL) ) );
+    srand(time(NULL));
     /* 
      * TODO: Do any initialization you need to do here (setting up the board,
      * precalculating things, etc.) However, remember that you will only have
      * 30 seconds.
      */
-     this->side = side;
+    this->side = side;
 }
 
 /*
@@ -70,17 +70,30 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
 
         double best_wins = 0;
         Move *best_move = (*moves)[0];
+
         for (it = moves->begin(); it != moves->end(); it++) {
             Board *copy = this->board.copy();
             Move *m = *it;
             copy->do_move(m, this->side);
             double wins = 0;
             for (int i = 0; i < NUM_SIMS; i += 1) {
-                wins += this->simulate_rand(copy);
+                Board *copy_ = copy->copy();
+                double w = this->simulate_rand(copy_);
+                delete copy_;
+                wins += w;
             }
+            //fprintf(stderr, "sum:%f\n", wins);
             if (wins > best_wins) {
                 best_wins = wins;
                 best_move = m;
+            }
+            else if (wins == best_wins) {
+                int bs = Board::score_board[best_move->x + best_move->y * 8];
+                int ms = Board::score_board[m->x + m->y * 8];
+                if(ms > bs) {
+                    best_wins = wins;
+                    best_move = m;
+                }
             }
             delete copy;
         }
@@ -105,6 +118,9 @@ double Player::simulate_rand(Board *b) {
     double bonus = this->calc_bonus(b, p1, moves, NULL);
 
     while (moves->size()) {
+
+        shuffle(moves->begin(), moves->end(), this->rng);
+
         Move *m = this->pick_move(b, p1, moves);
         bonus += this->calc_bonus(b, p1, NULL, m);
 
@@ -129,7 +145,7 @@ double Player::simulate_rand(Board *b) {
             bonus += this->calc_bonus(b, p1, moves, NULL);
         }
     }
-    return 2 * ((b->count(this->side) - b->count(other)) > 0) + bonus;
+    return 10 * ((b->count(this->side) - b->count(other)) > 0) + bonus;
 }
 
 /*
@@ -156,7 +172,7 @@ double Player::calc_bonus(Board *b, Side s, vector<Move *> *moves, Move *m) {
             (x == 7 && y == 0)  ||
             (x == 0 && y == 7)  ||
             (x == 7 && y == 7) ){
-            bonus = 0.1;
+            bonus = 1;
             return bonus*c;
         }
     }
@@ -165,7 +181,7 @@ double Player::calc_bonus(Board *b, Side s, vector<Move *> *moves, Move *m) {
     }
 
     //mobility bonus
-    bonus += moves->size() * 1; 
+    bonus += moves->size() * 0.01; 
 
     //score bonus
     //bonus += (b->count(s) - b->count(s == BLACK ? WHITE : BLACK)) * 0.02;
@@ -186,7 +202,7 @@ double Player::calc_bonus(Board *b, Side s, vector<Move *> *moves, Move *m) {
             // Corner bonus: we want to have corners, and keep them from the enemy.
             Side corner = b->get(x, y) == 1 ? BLACK : WHITE;
             if (s) {
-                bonus += (s == corner) ? 2 : -2;
+                bonus += (s == corner) ? 5 : -5;
             }
         }
     }
@@ -201,11 +217,15 @@ double Player::calc_bonus(Board *b, Side s, vector<Move *> *moves, Move *m) {
  */
 Move *Player::pick_move(Board *b, Side s, vector<Move *> *moves) {
 
-    random_shuffle(moves->begin(), moves->end());
+    shuffle(moves->begin(), moves->end(), this->rng);
     vector<Move *>::iterator it; 
     int best_score = -10;
     Move *best = NULL;
+
+    return *(moves->begin());
+
     for (it = moves->begin(); it != moves->end(); it++) {
+
         Move *m = *it;
         int b = Board::score_board[m->x + m->y * 8];
         if (b > best_score) {
@@ -224,7 +244,6 @@ Move *Player::pick_move(Board *b, Side s, vector<Move *> *moves) {
     Move *m4 = NULL;
     Move *m5 = NULL;
 
-    random_shuffle(moves->begin(), moves->end());
     //vector<Move *>::iterator it; 
     for (it = moves->begin(); it != moves->end(); it++) {
 
