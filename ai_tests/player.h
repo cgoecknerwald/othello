@@ -26,8 +26,8 @@ private:
     std::mt19937 rng;
 
     int rand_int(int from, int to);
-    double calc_bonus(Board *b, Side s, vector<Move *> *moves, Move *m);
-    Move *pick_move(Board *b, Side s, vector<Move *> *moves);
+    double calc_bonus(Board *b, Side s, unique_ptr<vector<Move *> > &moves, Move *m);
+    Move *pick_move(Board *b, Side s, unique_ptr<vector<Move *> > &moves);
 };
 
 #endif

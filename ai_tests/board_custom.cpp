@@ -190,8 +190,8 @@ bool Board::get_valid_dirs(const Move *m, const Side s) {
 	return m->dirs->size() != 0;
 }
 
-vector<Move *> *Board::get_valid_moves(const Side s) {
-	vector<Move *> *moves = new vector<Move *>();
+unique_ptr<vector<Move *> > Board::get_valid_moves(const Side s) {
+	unique_ptr<vector<Move *> > moves(new vector<Move *>());
 	for (int x = 0; x < 8; x += 1) {
 		for (int y = 0; y < 8; y += 1) {
 			Move *move = new Move(x, y);

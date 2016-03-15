@@ -29,6 +29,14 @@ public:
         dirs = new vector<Dir *>();
     }
 
+    ~Move() {
+        vector<Dir *>::iterator it;
+        for(it = dirs->begin(); it != dirs->end(); it++){
+            delete *it;
+        }
+        delete dirs;
+    }
+
     int scalar() const {
         return x + y * 8;
     }
@@ -60,7 +68,7 @@ public:
      * returns false if dir is empty
      */
     bool get_valid_dirs(const Move *m, const Side);
-    vector<Move *> *get_valid_moves(Side);
+    unique_ptr<vector<Move *> > get_valid_moves(Side);
     void do_move(const Move *m, const Side);
 };
 

@@ -2,6 +2,7 @@
 #include <random>
 #include <algorithm>
 #include <ctime> 
+#include <memory>
 #include "player.h"
 #include "common.h"
 #include "board_custom.h"
@@ -49,8 +50,8 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
     if(opponentsMove != NULL) {
         this->board.do_move(opponentsMove, other);
         //fprintf(stderr, "did op move: (%i, %i)\n", opponentsMove->x, opponentsMove->y);
-    }
     
+    }    
     // vector<Move *> *moves = this->board.get_valid_moves(this->side);
     // Move *m = (*moves)[0];
     // //fprintf(stderr, "doing move: (%i, %i)\n", m->x, m->y);
@@ -61,7 +62,7 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
         return NULL;
     }
     else {
-        vector<Move *> *moves = this->board.get_valid_moves(this->side);
+        unique_ptr<vector<Move *> > moves = this->board.get_valid_moves(this->side);
         vector<Move *>::iterator it;
         
         if (moves->size() == 0) {
@@ -95,6 +96,9 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
                     best_move = m;
                 }
             }
+            if(best_move != *it) {
+                delete *it;
+            }
             delete copy;
         }
         this->board.do_move(best_move, this->side);
@@ -114,7 +118,7 @@ double Player::simulate_rand(Board *b) {
 
     Side temp;
     
-    vector<Move *> *moves = b->get_valid_moves(p1);
+    unique_ptr<vector<Move *> > moves = b->get_valid_moves(p1);
     double bonus = this->calc_bonus(b, p1, moves, NULL);
 
     while (moves->size()) {
@@ -122,25 +126,22 @@ double Player::simulate_rand(Board *b) {
         shuffle(moves->begin(), moves->end(), this->rng);
 
         Move *m = this->pick_move(b, p1, moves);
-        bonus += this->calc_bonus(b, p1, NULL, m);
+        //bonus += this->calc_bonus(b, p1, NULL, m);
 
         b->do_move(m, p1);
-        
+        delete m;
         //swaps sides
         temp = p1;
         p1 = p2;
         p2 = temp;
 
-        delete moves;
         moves = b->get_valid_moves(p1);
 
         if (moves->size() == 0) {
-
             temp = p1;
             p1 = p2;
             p2 = temp;
 
-            delete moves;
             moves = b->get_valid_moves(p1);
             bonus += this->calc_bonus(b, p1, moves, NULL);
         }
@@ -161,7 +162,7 @@ int Player::rand_int(int from, int to) {
  * Calculates the bonus (detailed in AI.txt). This bonus improves AI function-
  * ality by maxmizing the impact of "good" states, and punishing for "bad". 
  */
-double Player::calc_bonus(Board *b, Side s, vector<Move *> *moves, Move *m) {
+double Player::calc_bonus(Board *b, Side s, unique_ptr<vector<Move *> > &moves, Move *m) {
 
     double bonus = 0.0;
     int c = (this->side == s) ? 1 : -1;
@@ -215,14 +216,14 @@ double Player::calc_bonus(Board *b, Side s, vector<Move *> *moves, Move *m) {
  * 
  * In our simulation, we pick for our AI and enemy AI.
  */
-Move *Player::pick_move(Board *b, Side s, vector<Move *> *moves) {
+Move *Player::pick_move(Board *b, Side s, unique_ptr<vector<Move *> > &moves) {
 
     shuffle(moves->begin(), moves->end(), this->rng);
     vector<Move *>::iterator it; 
     int best_score = -10;
     Move *best = NULL;
 
-    return *(moves->begin());
+    //return *(moves->begin());
 
     for (it = moves->begin(); it != moves->end(); it++) {
 
@@ -231,6 +232,9 @@ Move *Player::pick_move(Board *b, Side s, vector<Move *> *moves) {
         if (b > best_score) {
             best_score = b;
             best = m;
+        }
+        else {
+            delete *it;
         }
     }
     return best;
