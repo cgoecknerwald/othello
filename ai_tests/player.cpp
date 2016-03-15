@@ -132,12 +132,21 @@ double Player::simulate_rand(Board *b) {
     return 2 * ((b->count(this->side) - b->count(other)) > 0) + bonus;
 }
 
+/*
+ * Create a random integer from "from" to "to".
+ * Uses a uniform_int_distribution.
+ */
 int Player::rand_int(int from, int to) {
     uniform_int_distribution<int> uni(from, to-1);
     return uni(this->rng);
 }
 
+/*
+ * Calculates the bonus (detailed in AI.txt). This bonus improves AI function-
+ * ality by maxmizing the impact of "good" states, and punishing for "bad". 
+ */
 double Player::calc_bonus(Board *b, Side s, vector<Move *> *moves, Move *m) {
+
     double bonus = 0.0;
     int c = (this->side == s) ? 1 : -1;
     if (m != NULL) {
@@ -161,12 +170,20 @@ double Player::calc_bonus(Board *b, Side s, vector<Move *> *moves, Move *m) {
     //score bonus
     //bonus += (b->count(s) - b->count(s == BLACK ? WHITE : BLACK)) * 0.02;
 
+    /* 
+     * Iterate through each of the corners, (0,0), (0,7), (7,0), and (7,7). 
+     */
+    // Either 0 or 7. 
     for (int x = 0; x <= 7; x += 7) {
+        // Either 0 or 7.
         for (int y = 0; y <= 7; y += 7) {
+
             int corner_int = b->get(x, y);
+            // If it's empty, continue.
             if (!corner_int) {
                 continue;
             }
+            // Corner bonus: we want to have corners, and keep them from the enemy.
             Side corner = b->get(x, y) == 1 ? BLACK : WHITE;
             if (s) {
                 bonus += (s == corner) ? 2 : -2;
@@ -176,6 +193,12 @@ double Player::calc_bonus(Board *b, Side s, vector<Move *> *moves, Move *m) {
     return bonus * c;
 }
 
+/*
+ * This is the simulation that runs using the Roxanne chart (as opposed to Monte
+ * Carlo random sampling). 
+ * 
+ * In our simulation, we pick for our AI and enemy AI.
+ */
 Move *Player::pick_move(Board *b, Side s, vector<Move *> *moves) {
 
     random_shuffle(moves->begin(), moves->end());
@@ -191,7 +214,11 @@ Move *Player::pick_move(Board *b, Side s, vector<Move *> *moves) {
         }
     }
     return best;
-
+    
+    /* 
+     * Move "m"-n indicates the n-th priority square based on the Roxanne chart.
+     * There's no move m1 because we will return immediately upon finding it. 
+     */    
     Move *m2 = NULL;
     Move *m3 = NULL;
     Move *m4 = NULL;
@@ -245,16 +272,18 @@ Move *Player::pick_move(Board *b, Side s, vector<Move *> *moves) {
         }
     }
 
-    //return (*moves)[rand_int(0, moves->size())];
-
-    if(m2) {
+    // Select the best move based on Roxanne Priority Chart. (For the random 
+    // sampling simulation - a modification of Monte Carlo.)
+    if (m2) {
         return m2;
     }
-    else if(m3) {
+    else if (m3) {
         return m3;
     }
-    else if(m4) {
+    else if (m4) {
         return m4;
     }
     return m5;
 }
+
+
