@@ -18,6 +18,8 @@ For reference, this is the "Roxanne Priority Table", as detailed by Ryan Archer 
 
 ![Priority table](/img/roxanne.png)
 
+We ended up modifying the Roxanne priority table slightly.
+
 ## Contributions
 
 Enrico:
