@@ -35,6 +35,18 @@ Board *Board::copy() {
 	return b;
 }
 
+int Board::get(int x, int y) {
+	if (black[x + y * 8]) {
+		return 1;
+	}
+	else if (taken[x + y * 8]) {
+		return -1;
+	}
+	else {
+		return 0;
+	}
+}
+
 int Board::count(Side side) {
 	int black_c = 0;
 	int taken_c = 0;

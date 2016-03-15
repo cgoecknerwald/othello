@@ -5,7 +5,7 @@
 #include "board_custom.h"
 
 #define HEURISTIC false
-#define NUM_SIMS 500
+#define NUM_SIMS 700
 /*
  * Constructor for the player; initialize everything here. The side your AI is
  * on (BLACK or WHITE) is passed in as "side". The constructor must finish 
@@ -127,7 +127,7 @@ double Player::simulate_rand(Board *b) {
             bonus += this->calc_bonus(b, p1, moves);
         }
     }
-    return ((b->count(this->side) - b->count(other)) > 0) + bonus;
+    return 10 * ((b->count(this->side) - b->count(other)) > 0) + bonus;
 }
 
 int Player::rand_int(int from, int to) {
@@ -136,7 +136,28 @@ int Player::rand_int(int from, int to) {
 }
 
 double Player::calc_bonus(Board *b, Side s, vector<Move *> *moves) {
-    return 0.0;
+    double bonus = 0.0;
+    int c = (this->side == s) ? 1 : -1;
+
+    //mobility bonus
+    bonus += moves->size() * 0.005; 
+
+    //score bonus
+    bonus += (b->count(s) - b->count(s == BLACK ? WHITE : BLACK)) * 0.003;
+
+    for (int x = 0; x <= 7; x += 7) {
+        for (int y = 0; y <= 7; y += 7) {
+            int corner_int = b->get(x, y);
+            if (!corner_int) {
+                continue;
+            }
+            Side corner = b->get(x, y) == 1 ? BLACK : WHITE;
+            if (s) {
+                bonus += (s == corner) ? 0.01 : -0.01;
+            }
+        }
+    }
+    return bonus * c;
 }
 
 Move *Player::pick_move(Board *b, Side s, vector<Move *> *moves) {

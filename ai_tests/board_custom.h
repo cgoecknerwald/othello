@@ -41,8 +41,8 @@ private:
     void print();
 public:
     Board();
-
     Board *copy();
+    int get(int x, int y);
     int count(Side);
     bool is_valid_move(const Move *m, const Side);
 
