@@ -1,5 +1,5 @@
 CC          = g++
-CFLAGS      = -Wall -ansi -pedantic -ggdb
+CFLAGS      = -std=c++11 -Wall -ansi -pedantic -ggdb
 OBJS        = player.o board_custom.o
 PLAYERNAME  = team_extreme
 
@@ -15,7 +15,7 @@ testminimax: $(OBJS) testminimax.o
 	$(CC) -o $@ $^
 
 %.o: %.cpp
-	$(CC) -c $(CFLAGS) -x c++ $< -o $@
+	$(CC) -c $(CFLAGS) -x c++ -std=c++11 $< -o $@
 	
 java:
 	make -C java/
